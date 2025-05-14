@@ -17,6 +17,8 @@ export const getTitleFromPath = (path: string) => {
     '/login': '로그인',
     '/profile': 'ME',
     '/register': '회원가입',
+    '/friends': '친구',
+    '/chats': '채팅',
   };
 
   //  '/transactions/[...slug]': '지출 내역 수정', 이 적용이 되지 않기에 아래처럼 함
@@ -214,4 +216,10 @@ export function formatCurrency(amount: number, showSymbol = true): string {
     currency: 'KRW',
     maximumFractionDigits: 0,
   }).format(amount)
-} 
+}
+
+
+export const getRoomTitleUserLength = (room: Room): number => {
+  const users = room.attributes.users_permissions_users.data;
+  return users.length
+};

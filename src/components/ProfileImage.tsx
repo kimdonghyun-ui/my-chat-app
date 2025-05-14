@@ -1,15 +1,15 @@
+import React from "react";
+
 type ProfileImageProps = {
 	svgString: string;
-	width?: number;
-	height?: number;
+	size?: number;
 	className?: string;
 	alt?: string;
 };
 
-const ProfileImage = ({
+const ProfileImage: React.FC<ProfileImageProps> = React.memo(({
 	svgString,
-	width = 50,
-	height = 50,
+	size = 50,
 	className = "",
 	alt = "Profile Image",
 }: ProfileImageProps) => {
@@ -20,12 +20,14 @@ const ProfileImage = ({
 	return (
 		<div
 			className={className}
-			style={{ width, height }}
-			aria-label={alt} // ✅ 접근성 추가
-			role="img" // ✅ 스크린리더에서 이미지로 인식
+			style={{ width: size, height: size }}
+			aria-label={alt}
+			role="img"
 			dangerouslySetInnerHTML={{ __html: svgString }}
 		/>
 	);
-};
+});
+
+ProfileImage.displayName = 'ProfileImage';
 
 export default ProfileImage;

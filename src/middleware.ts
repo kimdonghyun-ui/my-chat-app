@@ -23,7 +23,7 @@ export function middleware(request: NextRequest) {
   // 이미 인증된 사용자가 로그인 또는 회원가입 페이지 등에 접근하려는 경우
   if (authRoutes.includes(pathname)) {
     if (isAuthenticated) {
-      const url = new URL('/', request.url);
+      const url = new URL('/friends', request.url);
       return NextResponse.redirect(url);
     }
   }
@@ -40,9 +40,8 @@ export const config = {
     '/login', // 로그인
     '/register', // 회원가입
     '/profile', // 프로필
-    // '/dashboard', // 대시보드
-    // '/statistics',  // 통계
-    // '/transactions',  // 거래내역
+    '/friends', // 친구
+    '/chats', // 채팅
     //'/transactions/(.*)', // transactions/new 또는 transactions/123/edit 등의 transactions/ 뒤에 뭐가 더붙는 페이지 전부
     
   ],

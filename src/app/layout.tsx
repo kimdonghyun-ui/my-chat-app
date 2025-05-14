@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import GlobalEffects from '@/components/GlobalEffects';
 import LayoutGuard from "@/components/layout/LayoutGuard";
+import { Toaster } from "react-hot-toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,10 +29,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <GlobalEffects />
         <LayoutGuard>
-          {children}
+          <div className="max-w-md mx-auto h-screen bg-white">
+            {children}
+          </div>
         </LayoutGuard>
+        <Toaster position="top-center" reverseOrder={false} />
       </body>
     </html>
   );

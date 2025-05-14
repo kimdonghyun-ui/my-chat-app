@@ -1,4 +1,5 @@
-import Header from "@/components/layout/Header";
+import GlobalEffects from "@/components/GlobalEffects";
+import { SideMenu } from "@/components/layout/SideMenu";
 
 export default function RootLayout({
   children,
@@ -6,9 +7,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <div className="flex flex-col h-screen">
-      <Header showBackButton />
-      <div className="flex-1 pt-16">{children}</div>
-    </div>
+    <>
+      <GlobalEffects />
+      <div className="flex h-screen">
+        <SideMenu />
+        <div className="flex-1 overflow-y-auto">{children}</div> {/* ✅ flex-1줘서 컨텐츠가 남은 공간 100% */}
+      </div>
+    </>
   );
 }

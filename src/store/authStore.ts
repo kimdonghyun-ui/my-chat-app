@@ -4,6 +4,7 @@ import { Login, LoginResponse, User, Register, ProfileUpdate } from '../types/au
 import { fetchApi } from "@/lib/fetchApi";
 import { toast } from 'react-hot-toast';
 import { useRedirectStore } from './redirectStore';
+import { useFriendStore } from './friendStore';
 
 interface AuthStore {
   error: string | null;
@@ -70,7 +71,7 @@ export const useAuthStore = create<AuthStore>()(
           }
 
           toast.success('로그인 성공!');
-          useRedirectStore.getState().setLinkName('/'); // ✅ 로그인 후 리다이렉트 처리
+          useRedirectStore.getState().setLinkName('/friends'); // ✅ 로그인 후 리다이렉트 처리
 
         } catch (err) {
           set({ error: '로그인 실패!' });
@@ -128,6 +129,23 @@ export const useAuthStore = create<AuthStore>()(
       // performLogout = 로그아웃 처리
       performLogout: async () => {
         set({ isLoading: true, error: null });
+        const user = get().user;
+        if (user?.id) {
+          await (async () => {
+            const socket = (await import("@/lib/socket")).default;
+            await useFriendStore.getState().PutFriendisOnlineUpdate(user.id, false);
+            
+            const updatedFriends = await useFriendStore.getState().getFriends();
+            const simplifiedUsers = updatedFriends.map((friend) => ({
+              id: friend.id,
+              isOnline: friend.isOnline,
+            }));
+        
+            socket.emit("updated-friends", simplifiedUsers);
+          })();
+        }
+
+        
         try {
  
           await fetchApi("/auth/logout", {
@@ -150,8 +168,7 @@ export const useAuthStore = create<AuthStore>()(
           });
           toast.success('로그아웃 실패지만 강제로 로그아웃 처리!');
         } finally {
-          set({ isLoading: false });
-
+          
           // HttpOnly 쿠키 제거 요청 (Next.js API route)
           //accessToken 쿠키 삭제
           await fetch("/api/set-cookie", {
@@ -165,11 +182,11 @@ export const useAuthStore = create<AuthStore>()(
           });
 
           //##### 스토어 초기화(Zustand) 시작#####
-          get().reset(); //localStorage + 메모리 상태 초기화
+          get().reset(); //useAuthStore = localStorage + 메모리 상태 초기화
+          useFriendStore.getState().reset(); //useFriendStore = localStorage + 메모리 상태 초기화
+          //##### 스토어 초기화(Zustand) 끝#####
 
           useRedirectStore.getState().setLinkName('/login'); // 로그인 페이지로 리다이렉트(.ts에서는 router를 사용못하므로 해결책으로 사용)
-
-          //##### 스토어 초기화(Zustand) 끝#####
 
         }
       },
