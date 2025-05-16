@@ -67,8 +67,7 @@ export default function ProfileContent() {
                   <ProfileImage
                     svgString={editedUser.profileImage || ""}
                     alt={editedUser.username}
-                    width={128}
-                    height={128}
+                    size={128}
                     className="object-cover"
                   />
                 ) : (

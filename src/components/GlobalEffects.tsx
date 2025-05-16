@@ -9,12 +9,12 @@ import { useFriendStore } from '@/store/friendStore';
 import socket from '@/lib/socket';
 import { waitForSocketConnection } from '@/lib/socketUtils';
 import { Room } from '@/types/type';
-import { useChatStore } from '@/store/chatStore';
+// import { useChatStore } from '@/store/chatStore';
 import { useRoomStore } from '@/store/roomStore';
 
 export default function ClientHandler() {
   const isDarkMode = useThemeStore((state) => state.isDarkMode); // 다크모드 상태 불러오기
-  const { user, accessToken } = useAuthStore();
+  const { user } = useAuthStore();
   const { friends, setFriends, updateFriendOnlineStatus } = useFriendStore();
 
 

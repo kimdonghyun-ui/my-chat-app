@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, memo, useMemo } from "react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { ChevronLeft } from "lucide-react";
-import ProfileImage from "./ProfileImage";
+// import ProfileImage from "./ProfileImage";
 import { useChatStore } from "@/store/chatStore";
 import { User } from "@/types/auth";
 import { Message, MessageResponse, Room, Sender } from "@/types/type";

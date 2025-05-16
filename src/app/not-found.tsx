@@ -1,4 +1,6 @@
 // app/not-found.tsx
+import Link from 'next/link';
+
 export default function NotFound() {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-purple-100 to-pink-100 dark:from-gray-900 dark:to-gray-800 text-center px-4">
@@ -11,12 +13,12 @@ export default function NotFound() {
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           존재하지 않는 페이지거나, 주소가 잘못 입력되었습니다.
         </p>
-        <a
-          href="/"
+        <Link
+          href="/friends"
           className="inline-block bg-purple-600 text-white px-6 py-3 rounded-xl shadow hover:bg-purple-700 transition"
         >
           홈으로 돌아가기
-        </a>
+        </Link>
       </div>
     );
 }

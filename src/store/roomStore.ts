@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
-import { StrapiResponse, Room, PostChatRoom, Message, MessageResponse, SendMessageResponse, Sender, UpdateRoomResponse } from "@/types/type";
+import { StrapiResponse, Room, PostChatRoom, UpdateRoomResponse } from "@/types/type";
 import { fetchApi } from '@/lib/fetchApi';
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";

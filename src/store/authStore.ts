@@ -155,7 +155,7 @@ export const useAuthStore = create<AuthStore>()(
 
           toast.success('로그아웃 성공!');
         } catch (err) {
-
+          console.log(err);
           //refreshToken 쿠키 삭제(위에 로그아웃 api 실패시를 대비)
           await fetch("/api/set-cookie", {
             method: "POST",

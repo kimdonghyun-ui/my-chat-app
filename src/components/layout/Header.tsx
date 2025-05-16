@@ -58,9 +58,9 @@ export default function Header({ showBackButton = false }: HeaderProps) {
           <DarkModeToggle />
           {accessToken && (
             <>
-              <IconBtn onClick={() => router.push('/')} icon={<LayoutDashboard />} title="홈" />
-              <IconBtn onClick={() => router.push('/profile')} icon={<User />} title="프로필" />
-              <IconBtn onClick={handleLogout} icon={<LogOut />} title="로그아웃" />
+              <IconBtn onClick={() => router.push('/')} icon={<LayoutDashboard />} title="홈" active={path === '/'} />
+              <IconBtn onClick={() => router.push('/profile')} icon={<User />} title="프로필" active={path === '/profile'} />
+              <IconBtn onClick={handleLogout} icon={<LogOut />} title="로그아웃" active={path === '/login'} />
             </>
           )}
         </div>

@@ -21,6 +21,7 @@ export default function DarkModeToggle() {
       onClick={toggleDarkMode}
       title="다크 모드 전환"
       icon={isDarkMode ? <Sun className="text-yellow-500" /> : <Moon className="text-gray-700" />}
+      active={isDarkMode}
     />
   );
 } 
