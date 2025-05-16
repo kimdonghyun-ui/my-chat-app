@@ -110,12 +110,13 @@ export const useAuthStore = create<AuthStore>()(
         set({ isLoading: true, error: null });
         try {
           const user = get().user;
-          const response = await fetchApi<LoginResponse>(`/users/${user?.id}`, {
-            method: "POST",
+          const response = await fetchApi<User>(`/users/${user?.id}`, {
+            method: "PUT",
             credentials: "include", //httpOnly 쿠키 를 제어하려면 필요
             body: JSON.stringify(data),
           }, true);
-          set({ user: response.user });
+          console.log(response);
+          set({ user: response });
           toast.success('프로필 업데이트 성공!');
         } catch (err) {
           set({ error: '프로필 업데이트 실패!' });
