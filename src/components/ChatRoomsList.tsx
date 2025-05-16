@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, X } from "lucide-react";
 import { format } from "date-fns";
 import { ko } from "date-fns/locale";
 import { useChatStore } from "@/store/chatStore";
@@ -105,25 +105,25 @@ console.log("rooms", rooms);
                   <p className="text-sm text-gray-500 truncate">
                     {room.attributes.lastMessage}
                   </p>
-                  {room.attributes.unreadCount > 0 && (
-                    <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {room.attributes.unreadCount}
-                    </span>
-                  )}
-                </div>
-
-                {/* ✅ 나가기 버튼 아래에 배치 */}
-                <div className="flex justify-end mt-1">
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleLeaveRoom(room.id)
                     }}
-                    className="px-2 py-1 text-xs bg-red-500 text-white rounded hover:bg-red-600"
                   >
-                    나가기
+                    <X />
                   </button>
+                  {/* {room.attributes.unreadCount > 0 && (
+                    <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {room.attributes.unreadCount}
+                    </span>
+                  )} */}
                 </div>
+
+                {/* ✅ 나가기 버튼 아래에 배치 */}
+                {/* <div className="flex justify-end mt-1">
+
+                </div> */}
 
               </div>
             </div>

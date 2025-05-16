@@ -52,14 +52,8 @@ export function SideMenu() {
       </div>
 
       {/* 하단 설정 메뉴 */}
-      <div className="p-2 border-t border-gray-200 dark:border-gray-700">
+      <div className="p-2 border-t border-gray-200 dark:border-gray-700 flex flex-col items-center">
         <DarkModeToggle />
-        <IconBtn
-          active={isActive("profile")}
-          onClick={() => router.push("/profile")}
-          icon={<Settings />}
-          title="설정"
-        />
         <IconBtn
           active={isActive("profile")}
           onClick={() => router.push("/profile")}
@@ -67,7 +61,7 @@ export function SideMenu() {
           title="프로필"
         />
         <IconBtn
-          active={isActive("profile")}
+          active={isActive("logout")}
           onClick={handleLogout}
           icon={<LogOut />}
           title="로그아웃"

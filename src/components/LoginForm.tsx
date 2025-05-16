@@ -7,18 +7,26 @@ import { useAuthStore } from '@/store/authStore';
 
 const loginMessages = [
   {
-    title: '지출도 추억이 된다면',
-    subtitle: '하루하루의 소비를 기록하며, 나만의 재정 이야기를 시작해보세요',
+    title: '연결의 시작',
+    subtitle: '친구들과의 대화를, 지금 바로 시작해보세요',
   },
-  {
-    title: '지출 관리, 더 쉽게',
-    subtitle: '매일의 수입과 지출을 한눈에. 당신만의 스마트 가계부를 시작하세요',
-  },
-  {
-    title: '돈의 흐름을 기록하세요',
-    subtitle: '작은 소비도 소중하게. 당신의 일상을 숫자로 담아보세요',
-  },
-]
+  // {
+  //   title: '너와 나, 그리고 우리의 채팅',
+  //   subtitle: '메시지 하나로 가까워지는 순간을 만들어보세요',
+  // },
+  // {
+  //   title: '대화를 이어가는 힘',
+  //   subtitle: '오늘의 생각, 감정, 일상을 공유해보세요',
+  // },
+  // {
+  //   title: '언제 어디서나 함께',
+  //   subtitle: '모바일로, 데스크탑으로, 끊김 없는 소통을 경험하세요',
+  // },
+  // {
+  //   title: '당신만의 공간, 당신만의 대화',
+  //   subtitle: '프라이빗한 대화가 시작되는 곳입니다',
+  // },
+];
 
 export default function LoginForm() {
   const [identifier, setIdentifier] = useState('hello@naver.com');
