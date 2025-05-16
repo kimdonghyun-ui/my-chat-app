@@ -2,7 +2,7 @@
 
 
 import { usePathname, useRouter } from 'next/navigation';
-import { UserCircle, MessageSquare, Settings, Search, LogOut, User } from "lucide-react";
+import { UserCircle, MessageSquare, LogOut, User } from "lucide-react";
 import DarkModeToggle from "../DarkModeToggle";
 import { IconBtn } from "../ui/IconBtn";
 import { useAuthStore } from '@/store/authStore';
