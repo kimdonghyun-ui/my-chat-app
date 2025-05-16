@@ -35,7 +35,7 @@ const ChatRoomPopup = ({
   const [input, setInput] = useState("");
   const [page, setPage] = useState(1);
   const { messages, sendMessage, getMessages, hasMore } = useChatStore();
-  const { addFriendToRoom } = useRoomStore();
+  const { addFriendToRoom, updateLastMessageToRoom } = useRoomStore();
   const chatBoxRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevMessageCountRef = useRef<number>(0);
@@ -140,7 +140,13 @@ const ChatRoomPopup = ({
 
     setInput("");
     const newMessage2 = await sendMessage(newMessage);
+    
     socket.emit("new-messages", newMessage2, activeRoomId);
+
+    const updatedRoom = await updateLastMessageToRoom(activeRoomId, newMessage.text)
+    // 소켓으로 다른 유저에게 초대 알림 보내기
+    socket.emit("room-invite", 'add', activeRoomId, updatedRoom );
+
   };
 
   const isMine = (sender: Sender) => {

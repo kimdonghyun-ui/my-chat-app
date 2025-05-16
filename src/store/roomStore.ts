@@ -15,6 +15,7 @@ interface RoomStore {
   addRoom: (room: Room) => void;
   addFriendToRoom: (roomId: number | null, friendId: number) => Promise<Room | null>;
   removeFriendToRoom: (roomId: number | null, friendId: number) => Promise<Room | null>;
+  updateLastMessageToRoom: (roomId: number | null, message: string) => Promise<Room | null>;
   roomInvite: (type: 'add' | 'remove', roomId: number, updatedRoom: Room) => Promise<void>;
   reset: () => void;
 }
@@ -161,6 +162,39 @@ export const useRoomStore = create<RoomStore>()(
                   return null;
                 }
             },
+
+
+
+
+
+
+
+            // updateLastMessageToRoom = 방에 마지막 메시지 저장하기
+            updateLastMessageToRoom  :async (roomId: number | null, message: string): Promise<Room | null> => {
+              try {
+                const response = await fetchApi<UpdateRoomResponse<Room>>(`/chat-rooms/${roomId}?populate=users_permissions_users`, {
+                  method: 'PUT',
+                  body: JSON.stringify({
+                    data: {
+                      lastMessage: message,
+                      lastMessageTime: new Date().toISOString(),
+                    }
+                  }),
+                }, true);
+                await get().getRooms(); // ✅ 채팅방 목록 불러오기
+                return response.data;
+              } catch {
+                set({ error: '채팅방 업데이트에 실패했습니다.' });
+                return null;
+              }
+          },
+
+
+
+
+
+
+
 
             // roomInvite = 방 초대 수신 처리
             roomInvite: async (type: 'add' | 'remove', roomId: number, updatedRoom: Room) => {
