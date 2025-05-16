@@ -3,32 +3,28 @@
 import ProfileImage from "@/components/ProfileImage";
 import { UserCircle } from "lucide-react";
 import { useFriendStore } from "@/store/friendStore";
-import { useAuthStore } from "@/store/authStore";
-import { useChatStore } from "@/store/chatStore";
+import { useRoomStore } from "@/store/roomStore";
 import socket from "@/lib/socket";
 import { getTitleFromPath } from "@/utils/utils";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function FriendsList() {
   const { friends } = useFriendStore();
-  const { createRoom } = useChatStore();
-  const { user } = useAuthStore();
+  const { createRoom } = useRoomStore();
   const path = usePathname();
   const title = getTitleFromPath(path);
-  
+  const router = useRouter();
+
   const handleCreateRoom = async (friendId: number) => {
-    if (!user) return
-    
-    const newRoom = await createRoom(user.id, friendId)
+    const newRoom = await createRoom(friendId)
     if (newRoom) {
       socket.emit("new-room", newRoom); // ✅ 여기 추가
+      router.push(`/rooms`);
     } else {
       console.error("채팅방 생성 실패");
     }
-
   };
-
-  
 
   return (
     <div className="p-4">

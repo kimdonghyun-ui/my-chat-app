@@ -59,16 +59,13 @@ export async function fetchApi<T>(
 }
 
 
-
-
 //리플래쉬 = httponly - cookie 속의 refreshToken 을 사용하여 accessToken 을 재발급하는 함수
 export async function refreshApi(): Promise<RefreshResponse> {
     return fetchApi<RefreshResponse>('/token/refresh', {
       method: 'POST',
       credentials: 'include', //httpOnly 쿠키 를 제어하려면 필요
-    }, false);
+    }, false, false);
 }
-
 
 // 억세스토큰을 새로 받은경우 쿠키와 로컬스토리지에 저장
 export async function updateAccessToken(jwt: string) {

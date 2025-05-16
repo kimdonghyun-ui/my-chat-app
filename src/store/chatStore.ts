@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from 'zustand/middleware';
-import { StrapiResponse, Room, PostChatRoom, Message, MessageResponse, SendMessageResponse, Sender, UpdateRoomResponse } from "@/types/chat";
+import { StrapiResponse, Room, PostChatRoom, Message, MessageResponse, SendMessageResponse, Sender, UpdateRoomResponse } from "@/types/type";
 import { fetchApi } from '@/lib/fetchApi';
 import { toast } from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
@@ -20,7 +20,7 @@ interface ChatStore {
   setMessages: (messages: MessageResponse<Message<Sender>>[]) => void;
   addRoom: (room: Room) => void;
   getRooms: () => Promise<void>;
-  createRoom: (userId: number, friendId: number) => Promise<Room | null>;
+
   sendMessage: (message: Message<number>) => Promise<MessageResponse<Message<Sender>> | null>;
   getMessages: (roomId: number, page: number) => Promise<void>;
   reset: () => void;
@@ -48,7 +48,7 @@ export const useChatStore = create<ChatStore>()(
         const { user } = useAuthStore.getState();
         try {
         set({ isLoading: true, error: null });
-        const response = await fetchApi<StrapiResponse<Room>>(`/chat-rooms?filters[users_permissions_users][id][$eq]=${user?.id}&populate=users_permissions_users&pagination[pageSize]=100`, { method: 'GET' }, true, false);
+        const response = await fetchApi<StrapiResponse<Room>>(`/chat-rooms?filters[users_permissions_users][id][$eq]=${user?.id}&populate=users_permissions_users&pagination[pageSize]=100`, { method: 'GET' }, true);
         set({ rooms: response.data });
         } catch {
         set({ error: '채팅방 정보를 불러오는데 실패했습니다.' });
@@ -57,71 +57,7 @@ export const useChatStore = create<ChatStore>()(
         }
     },
 
-    createRoom: async (userId, friendId): Promise<Room | null> => {
 
-      // const { user } = useAuthStore.getState();
-      const { rooms } = useChatStore.getState();
-
-      if (rooms.length >= 100) {
-        toast.error("최대 채팅방 개수를 초과했습니다.");
-        return null;
-      }
-
-
-
-      //existingRoom = 방이 이미 존재하는지 확인
-      const existingRoom = rooms.find((room) => {
-        const participantIds = room.attributes.users_permissions_users.data.map((u: { id: number }) => u.id);
-        return participantIds.includes(userId) && participantIds.includes(friendId) && participantIds.length > 1;
-      });
-    
-
-      if(userId === friendId) {
-        toast.error("자기 자신과 채팅을 할 수 없습니다.");
-        return null
-      }
-
-
-      if (existingRoom) {
-        toast.error("이미 채팅방이 존재합니다.");
-        return null
-      }
-
-      const lastMessageTime = new Date().toISOString();
-      const data = {
-        lastMessage: "첫 메시지가 없습니다.",
-        lastMessageTime: lastMessageTime,
-        unreadCount: 0,
-        users_permissions_users: [userId, friendId], // ✅ data 없이 바로
-      }
-      try {
-        const response = await fetchApi<PostChatRoom<Room>>(`/chat-rooms?populate=users_permissions_users`, { 
-          method: 'POST',
-          body: JSON.stringify({data}), 
-        }, true, false);
-        const newRoom = response.data
-        set((state) => ({
-          rooms: [...state.rooms, newRoom], // ✅ 기존 배열에 새 방 추가
-        }))
-        console.log("newRoom", newRoom);
-
-//자꾸 채팅방 추가 하면 다른 유저 화면에도 보이는 문제 해결해야함
-        return newRoom
-
-        // const isMeInRoom = newRoom.attributes.users_permissions_users.data.some(
-        //   (user) => user.id === userId
-        // );
-        // if (isMeInRoom) {
-        //   return {newRoom,userId}
-        // } else {
-        //   return null
-        // }
-        // await useChatStore.getState().getRooms();
-      } catch {
-        set({ error: '채팅방 생성에 실패했습니다.' });
-        return null
-      }
-    },
 
     updateRoom: async (roomId: number | null, friendId: number): Promise<Room | null> => {
       try {
@@ -134,7 +70,7 @@ export const useChatStore = create<ChatStore>()(
               }
             }
           }),
-        }, true, false);
+        }, true);
         toast.success("초대 완료!");
         await useChatStore.getState().getRooms();
         return response.data;
@@ -156,7 +92,7 @@ export const useChatStore = create<ChatStore>()(
               }
             }
           }),
-        }, true, false);
+        }, true);
         toast.success("방 나가기 완료!");
         await useChatStore.getState().getRooms();
         const updatedRoom = response.data;
@@ -165,7 +101,7 @@ export const useChatStore = create<ChatStore>()(
           //남은 인원이 1명이면 방삭제(서버에서 방 삭제)
           await fetchApi<UpdateRoomResponse<Room>>(`/chat-rooms/${roomId}`, {
             method: 'DELETE',
-          }, true, false);
+          }, true);
         }
         return updatedRoom;
       } catch {
@@ -222,7 +158,7 @@ export const useChatStore = create<ChatStore>()(
         const response = await fetchApi<SendMessageResponse>(`/chat-messages?populate=sender`, {
           method: 'POST',
           body: JSON.stringify({data: message}),
-        });
+        }, true);
         const newMessage = response.data
         
         set((state) => ({
@@ -246,7 +182,7 @@ export const useChatStore = create<ChatStore>()(
 
       const response = await fetchApi<StrapiResponse<MessageResponse<Message<Sender>>>>(`/chat-messages?filters[chat_room][id][$eq]=${roomId}&sort=sentAt:desc&pagination[page]=${page}&pagination[pageSize]=20&populate=sender`, { 
         method: 'GET',
-      }, true, false);
+      }, true);
       const data = response.data.reverse();
 
       

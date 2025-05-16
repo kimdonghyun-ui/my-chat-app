@@ -8,11 +8,13 @@ import { useFriendStore } from '@/store/friendStore';
 // import { useChatStore } from '@/store/chatStore';
 import socket from '@/lib/socket';
 import { waitForSocketConnection } from '@/lib/socketUtils';
+import { Room } from '@/types/type';
+import { useChatStore } from '@/store/chatStore';
 
 export default function ClientHandler() {
   const isDarkMode = useThemeStore((state) => state.isDarkMode); // 다크모드 상태 불러오기
   const { user, accessToken } = useAuthStore();
-  const { friends, setFriends, PutFriendisOnlineUpdate } = useFriendStore();
+  const { friends, setFriends, updateFriendOnlineStatus } = useFriendStore();
 
 
   // ### isDarkMode 상태 변경시 다크모드 설정 (isDarkMode = true,false) ###
@@ -25,6 +27,13 @@ export default function ClientHandler() {
   }, [isDarkMode]);
   // ### isDarkMode ###
 
+
+    // ### 초기에 방목록 불러오기 ###
+    useEffect(() => {
+      if (!user) return;
+      useChatStore.getState().getRooms()
+    }, [user])
+    // ### 초기에 방목록 불러오기 ###
 
 
   // ### 소켓 = 나의 유저 값중에서 isOnline 값을 업데이트 하고 간소화하여 소켓에 데이터 보내기 ###
@@ -40,7 +49,7 @@ export default function ClientHandler() {
       }
       //##### 이 아래부터는 소켓 연결이 완료되었음 ######
 
-      await PutFriendisOnlineUpdate(user.id, true); // ✅ 침구 목록 중 접속한사람의 isOnline 값 true로 업데이트
+      await updateFriendOnlineStatus(user.id, true); // ✅ 침구 목록 중 접속한사람의 isOnline 값 true로 업데이트
 
       const updatedFriends = await useFriendStore.getState().getFriends();// ✅ 친구 목록 불러오기(위에서 업데이트된 친구목록)
       const simplifiedUsers = updatedFriends.map((friend) => ({ // id, isOnline 값만 보내기(프로필이미지가 base64코드라서 너무길어서 소켓이 받지못하기에 이렇게 간략화 해서 보냄)
@@ -56,7 +65,7 @@ export default function ClientHandler() {
     return () => {
       (async () => {
         console.log("🛑 언마운트 - 접속 해제",user);
-        await PutFriendisOnlineUpdate(user.id, false); // ✅ 침구 목록 중 접속해제한사람의 isOnline 값 false로  업데이트
+        await updateFriendOnlineStatus(user.id, false); // ✅ 침구 목록 중 접속해제한사람의 isOnline 값 false로  업데이트
 
         const updatedFriends = await useFriendStore.getState().getFriends();// ✅ 친구 목록 불러오기(위에서 업데이트된 친구목록)
         const simplifiedUsers = updatedFriends.map((friend) => ({ // id, isOnline 값만 보내기(프로필이미지가 base64코드라서 너무길어서 소켓이 받지못하기에 이렇게 간략화 해서 보냄)
@@ -68,7 +77,7 @@ export default function ClientHandler() {
         socket.disconnect(); // ✅ 소켓 연결 해제
       })();
     };
-  }, [user, PutFriendisOnlineUpdate]);
+  }, [user, updateFriendOnlineStatus]);
   // ### 소켓 = 나의 유저 값중에서 isOnline 값을 업데이트 하고 간소화하여 소켓에 데이터 보내기 ###
 
   // ### 소켓 = 위의 코드에서 소켓서버가 받은걸 토스해서 다시 돌려주는거 받는부분 ###
@@ -97,7 +106,26 @@ export default function ClientHandler() {
   // ### 소켓 = 위의 코드에서 소켓서버가 받은걸 토스해서 다시 돌려주는거 받는부분 ###
 
 
+  // ### 소켓 = 방목록 소켓으로부터 받는거 받는부분 ###
+  useEffect(() => {
+    const handleUpdatedRooms = (newRoom: Room) => {
+      console.log("📡 방목록 소켓으로부터 받기:", newRoom);
 
+      // isMeInRoom = 채팅방 참여자 중에 내가 있는지 확인(일단 소켓에선 룸이 추가 되면 새로운 룸을 무조건 여기로 던져줌 그걸받아서 내가 포함된 방이면 업데이트 아니라면 막기)
+        const isMeInRoom = newRoom.attributes.users_permissions_users.data.some(
+          (room) => room.id === user?.id
+        );
+        if (isMeInRoom) {
+          useChatStore.getState().addRoom(newRoom);
+        }
+    };
+    
+    socket.on("new-room", handleUpdatedRooms); // 소켓에서 되돌려주는거 받는부분
+    return () => {
+      socket.off("new-room", handleUpdatedRooms); // 언마운트시에 위의 소켓 에서 받는 코드 종료
+    };
+  }, [user]);
+  // ### 소켓 = 방목록 소켓으로부터 받는거 받는부분 ###
 
 
 

@@ -37,13 +37,13 @@ export function SideMenu() {
           active={isActive("friends")}
           onClick={() => router.push("/friends")}
           icon={<UserCircle />}
-          title="설정"
+          title="친구목록"
         />
         <IconBtn
-          active={isActive("chats")}
-          onClick={() => router.push("/chats")}
+          active={isActive("rooms")}
+          onClick={() => router.push("/rooms")}
           icon={<MessageSquare />}
-          title="설정"
+          title="채팅방"
         />
 
 

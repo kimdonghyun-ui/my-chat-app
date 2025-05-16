@@ -114,7 +114,7 @@ export const useAuthStore = create<AuthStore>()(
             method: "POST",
             credentials: "include", //httpOnly 쿠키 를 제어하려면 필요
             body: JSON.stringify(data),
-          }, false);
+          }, true);
           set({ user: response.user });
           toast.success('프로필 업데이트 성공!');
         } catch (err) {
@@ -133,7 +133,7 @@ export const useAuthStore = create<AuthStore>()(
         if (user?.id) {
           await (async () => {
             const socket = (await import("@/lib/socket")).default;
-            await useFriendStore.getState().PutFriendisOnlineUpdate(user.id, false);
+            await useFriendStore.getState().updateFriendOnlineStatus(user.id, false);
             
             const updatedFriends = await useFriendStore.getState().getFriends();
             const simplifiedUsers = updatedFriends.map((friend) => ({
@@ -151,7 +151,7 @@ export const useAuthStore = create<AuthStore>()(
           await fetchApi("/auth/logout", {
             method: "POST",
             credentials: "include", //httpOnly 쿠키 를 제어하려면 필요
-          }, false);
+          }, false,false);
 
           toast.success('로그아웃 성공!');
         } catch (err) {

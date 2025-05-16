@@ -41,7 +41,7 @@ export const config = {
     '/register', // 회원가입
     '/profile', // 프로필
     '/friends', // 친구
-    '/chats', // 채팅
+    '/rooms', // 채팅
     //'/transactions/(.*)', // transactions/new 또는 transactions/123/edit 등의 transactions/ 뒤에 뭐가 더붙는 페이지 전부
     
   ],

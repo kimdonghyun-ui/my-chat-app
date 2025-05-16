@@ -1,5 +1,6 @@
 //utils/ (유틸리티 함수 폴더)
 
+import { Room } from '@/types/type';
 import { type ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 
@@ -18,7 +19,7 @@ export const getTitleFromPath = (path: string) => {
     '/profile': 'ME',
     '/register': '회원가입',
     '/friends': '친구',
-    '/chats': '채팅',
+    '/rooms': '채팅',
   };
 
   //  '/transactions/[...slug]': '지출 내역 수정', 이 적용이 되지 않기에 아래처럼 함
@@ -217,6 +218,18 @@ export function formatCurrency(amount: number, showSymbol = true): string {
     maximumFractionDigits: 0,
   }).format(amount)
 }
+
+
+export const getRoomTitle = (room: Room): string => {
+  const users = room.attributes.users_permissions_users.data;
+  if (!users || users.length === 0) {
+    return "참여자 없음";
+  }
+
+  // 이름만 꺼내서 쉼표로 합치기
+  const usernames = users.map((user) => user.attributes.username);
+  return usernames.join(", ");
+};
 
 
 export const getRoomTitleUserLength = (room: Room): number => {
