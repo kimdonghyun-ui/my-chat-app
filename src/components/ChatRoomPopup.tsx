@@ -7,9 +7,11 @@ import { ChevronLeft } from "lucide-react";
 import ProfileImage from "./ProfileImage";
 import { useChatStore } from "@/store/chatStore";
 import { User } from "@/types/auth";
-import { Message, MessageResponse, Room, Sender } from "@/types/chat";
+import { Message, MessageResponse, Room, Sender } from "@/types/type";
 import socket from "@/lib/socket";
 import { useFriendStore } from "@/store/friendStore";
+import { useRoomStore } from "@/store/roomStore";
+import { UserRound } from 'lucide-react';
 
 interface ChatRoomPopupProps {
   isOpen: boolean;
@@ -32,7 +34,8 @@ const ChatRoomPopup = ({
 }: ChatRoomPopupProps) => {
   const [input, setInput] = useState("");
   const [page, setPage] = useState(1);
-  const { messages, sendMessage, getMessages, hasMore, updateRoom } = useChatStore();
+  const { messages, sendMessage, getMessages, hasMore } = useChatStore();
+  const { addFriendToRoom } = useRoomStore();
   const chatBoxRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const prevMessageCountRef = useRef<number>(0);
@@ -144,10 +147,10 @@ const ChatRoomPopup = ({
     return sender?.data?.id === userData.id;
   };
 
-
-  const handleUpdateRoom = async (friendId: number) => {
-    const updatedRoom = await updateRoom(activeRoomId, friendId)
-    console.log("updatedRoom", updatedRoom)
+  // handleAddFriendToRoom = 친구 추가
+  const handleAddFriendToRoom = async (friendId: number) => {
+    const updatedRoom = await addFriendToRoom(activeRoomId, friendId)
+    console.log("addFriendToRoom", updatedRoom)
     // 소켓으로 다른 유저에게 초대 알림 보내기
     socket.emit("room-invite", 'add', activeRoomId, updatedRoom );
   };
@@ -191,11 +194,15 @@ const ChatRoomPopup = ({
                   mine ? "flex-row-reverse" : "flex-row"
                 }`}
               >
-                <ProfileImage
+                {/* <ProfileImage
                   svgString={sender?.profileImage || ""}
                   alt={sender?.username}
                   size={40}
                   className="object-cover rounded-full overflow-hidden"
+                /> */}
+                <UserRound
+                  size={40}
+                  className="rounded-full bg-gray-300 text-white p-2"
                 />
                 <div
                   className={`flex flex-col max-w-[75%] ${
@@ -258,13 +265,13 @@ const ChatRoomPopup = ({
       {inviteOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
           <div className="bg-white p-4 rounded-lg w-64">
-            <h3 className="text-lg font-bold mb-2">친구 초대</h3>
+            <h3 className="text-lg font-bold mb-2">친구 추가</h3>
             {inviteCandidates.map((friend) => (
               <div key={friend.id} className="flex justify-between items-center mb-2">
                 <p>{friend.username}</p>
                 <button
                   className="text-sm text-blue-500"
-                  onClick={() => handleUpdateRoom(friend.id)}
+                  onClick={() => handleAddFriendToRoom(friend.id)}
                 >
                   초대
                 </button>

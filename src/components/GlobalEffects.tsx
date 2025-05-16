@@ -10,6 +10,7 @@ import socket from '@/lib/socket';
 import { waitForSocketConnection } from '@/lib/socketUtils';
 import { Room } from '@/types/type';
 import { useChatStore } from '@/store/chatStore';
+import { useRoomStore } from '@/store/roomStore';
 
 export default function ClientHandler() {
   const isDarkMode = useThemeStore((state) => state.isDarkMode); // 다크모드 상태 불러오기
@@ -31,7 +32,7 @@ export default function ClientHandler() {
     // ### 초기에 방목록 불러오기 ###
     useEffect(() => {
       if (!user) return;
-      useChatStore.getState().getRooms()
+      useRoomStore.getState().getRooms()
     }, [user])
     // ### 초기에 방목록 불러오기 ###
 
@@ -116,7 +117,7 @@ export default function ClientHandler() {
           (room) => room.id === user?.id
         );
         if (isMeInRoom) {
-          useChatStore.getState().addRoom(newRoom);
+          useRoomStore.getState().addRoom(newRoom);
         }
     };
     
@@ -127,7 +128,20 @@ export default function ClientHandler() {
   }, [user]);
   // ### 소켓 = 방목록 소켓으로부터 받는거 받는부분 ###
 
-
+    // ✅ 소켓 방 친구 초대 수신 처리
+    useEffect(() => {
+      const handleRoomInvite = (
+        type: 'add' | 'remove',
+        roomId: number,
+        updatedRoom: Room
+      ) => {
+        useRoomStore.getState().roomInvite(type, roomId, updatedRoom)
+      };
+      socket.on("room-invite", handleRoomInvite);
+      return () => {
+        socket.off("room-invite", handleRoomInvite);
+      };
+    }, []);
 
   return null;
 }

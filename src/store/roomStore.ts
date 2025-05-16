@@ -10,7 +10,12 @@ interface RoomStore {
   error: string | null;
   rooms: Room[];
 
+  getRooms: () => Promise<void>;
   createRoom: (friendId: number) => Promise<Room | null>;
+  addRoom: (room: Room) => void;
+  addFriendToRoom: (roomId: number | null, friendId: number) => Promise<Room | null>;
+  removeFriendToRoom: (roomId: number | null, friendId: number) => Promise<Room | null>;
+  roomInvite: (type: 'add' | 'remove', roomId: number, updatedRoom: Room) => Promise<void>;
   reset: () => void;
 }
 
@@ -21,7 +26,23 @@ export const useRoomStore = create<RoomStore>()(
             error: null,
             rooms: [],
 
-            // createRoom = 채팅방 생성
+
+            // getRooms = 채팅방 목록 불러오기
+            getRooms: async () => {
+                const { user } = useAuthStore.getState();
+                try {
+                set({ isLoading: true, error: null });
+                const response = await fetchApi<StrapiResponse<Room>>(`/chat-rooms?filters[users_permissions_users][id][$eq]=${user?.id}&populate=users_permissions_users&pagination[pageSize]=100`, { method: 'GET' }, true);
+                set({ rooms: response.data });
+                } catch {
+                set({ error: '채팅방 정보를 불러오는데 실패했습니다.' });
+                } finally {
+                set({ isLoading: false });
+                }
+            },
+
+
+            // createRoom = 채팅방 생성(서버에 추가하는 함수)
             createRoom: async (friendId): Promise<Room | null> => {
 
                 const { user } = useAuthStore.getState();
@@ -73,19 +94,102 @@ export const useRoomStore = create<RoomStore>()(
                     }, true);
                     
                     const newRoom = response.data
-                    
-                    set((state) => ({
-                        rooms: [...state.rooms, newRoom], // ✅ 기존 배열에 새 방 추가
-                    }))
+                
+                    get().addRoom(newRoom);
                     
                     console.log("newRoom", newRoom);
                     return newRoom
                 } catch {
                     set({ error: '채팅방 생성에 실패했습니다.' });
                     return null
+                } finally {
+                    console.log("룸", get().rooms);
                 }
             },
 
+            // addRoom = 방 추가
+            addRoom: (room: Room) => set((state) => ({ rooms: [...state.rooms, room] })),
+
+            // addFriendToRoom = 방에 친구 추가(서버에 추가하는 함수)
+            addFriendToRoom:async (roomId: number | null, friendId: number): Promise<Room | null> => {
+                try {
+                  const response = await fetchApi<UpdateRoomResponse<Room>>(`/chat-rooms/${roomId}?populate=users_permissions_users`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                      data: {
+                        users_permissions_users: {
+                          connect: [friendId]
+                        }
+                      }
+                    }),
+                  }, true);
+                  toast.success("초대 완료!");
+                  await get().getRooms(); // ✅ 채팅방 목록 불러오기
+                  return response.data;
+                } catch {
+                  set({ error: '채팅방 업데이트에 실패했습니다.' });
+                  return null;
+                }
+            },
+
+            // removeFriendToRoom = 방 나가기  addFriendToRoom와는 반대인 셈
+            removeFriendToRoom: async (roomId: number | null, friendId: number): Promise<Room | null> => {
+                try {
+                  const response = await fetchApi<UpdateRoomResponse<Room>>(`/chat-rooms/${roomId}?populate=users_permissions_users`, {
+                    method: 'PUT',
+                    body: JSON.stringify({
+                      data: {
+                        users_permissions_users: {
+                          disconnect: [friendId],    // ⭐️ disconnect 사용
+                        }
+                      }
+                    }),
+                  }, true);
+                  toast.success("방 나가기 완료!");
+                  await get().getRooms();
+                  const updatedRoom = response.data;
+                  const friendCount = updatedRoom.attributes.users_permissions_users.data.length;
+                  if(friendCount === 1) {
+                    //남은 인원이 1명이면 방삭제(서버에서 방 삭제)
+                    await fetchApi<UpdateRoomResponse<Room>>(`/chat-rooms/${roomId}`, {
+                      method: 'DELETE',
+                    }, true);
+                  }
+                  return updatedRoom;
+                } catch {
+                  set({ error: '채팅방 삭제에 실패했습니다.' });
+                  return null;
+                }
+            },
+
+            // roomInvite = 방 초대 수신 처리
+            roomInvite: async (type: 'add' | 'remove', roomId: number, updatedRoom: Room) => {
+                if(type === 'add') {
+                  set((state) => ({
+                    rooms: state.rooms.map((room) => 
+                      room.id === roomId ? updatedRoom : room
+                    ),
+                  }));
+                }else{
+                  console.log("remove", updatedRoom);
+                  const friendCount = updatedRoom.attributes.users_permissions_users.data.length;
+                  if(friendCount === 1) {
+                    //남은 인원이 1명이면 방삭제(스테이트에서 방 삭제)
+                    set((state) => ({
+                      rooms: state.rooms.filter((room) => room.id !== roomId),
+                    }));
+                  }else{
+                    set((state) => ({
+                      rooms: state.rooms.map((room) => 
+                        room.id === roomId ? updatedRoom : room
+                      ),
+                    }));
+                  }
+                  
+                }
+              
+          
+              },
 
 
             reset: () => {

@@ -13,20 +13,21 @@ import { User } from "@/types/auth";
 import socket from "@/lib/socket";
 import { getTitleFromPath } from "@/utils/utils";
 import { usePathname } from "next/navigation";
+import { useRoomStore } from "@/store/roomStore";
 
 
 export default function ChatRoomsList() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeRoomId, setActiveRoomId] = useState<number | null>(null);
-  const [userData, setUserData] = useState<User | null>(null);
-  const path = usePathname();
-  const title = getTitleFromPath(path);
-  const { user } = useAuthStore();
-  // const { rooms, setHasMore, setMessages } = useChatStore();
-  const rooms = useChatStore((state) => state.rooms);
-const setHasMore = useChatStore((state) => state.setHasMore);
-const setMessages = useChatStore((state) => state.setMessages);
-const removeFriendFromRoom = useChatStore((state) => state.removeFriendFromRoom);
+  const [isOpen, setIsOpen] = useState(false); // ✅ 팝업 열기
+  const [activeRoomId, setActiveRoomId] = useState<number | null>(null); // ✅ 방 선택
+  const [userData, setUserData] = useState<User | null>(null); // ✅ 유저 선택
+  const path = usePathname(); // ✅ 경로 가져오기
+  const title = getTitleFromPath(path); // ✅ 타이틀 가져오기
+  const { user } = useAuthStore(); // ✅ 유저 가져오기
+
+  const rooms = useRoomStore((state) => state.rooms); // ✅ 방 목록 가져오기
+  const setHasMore = useChatStore((state) => state.setHasMore); // ✅ 더보기 설정
+  const setMessages = useChatStore((state) => state.setMessages); // ✅ 메시지 설정
+  const removeFriendFromRoom = useRoomStore((state) => state.removeFriendToRoom); // ✅ 친구 제거
 
   const selectedRoom = useMemo(
     () => rooms.find((room) => room.id === activeRoomId),
@@ -51,7 +52,7 @@ const removeFriendFromRoom = useChatStore((state) => state.removeFriendFromRoom)
 
 
 
-
+console.log("rooms", rooms);
 
 
 
