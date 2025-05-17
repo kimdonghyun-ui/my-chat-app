@@ -20,6 +20,8 @@ export default function ChatRoomsList() {
   const [isOpen, setIsOpen] = useState(false); // ✅ 팝업 열기
   const [activeRoomId, setActiveRoomId] = useState<number | null>(null); // ✅ 방 선택
   const [userData, setUserData] = useState<User | null>(null); // ✅ 유저 선택
+
+  const [unreadCount, setUnreadCount] = useState(0);
   const path = usePathname(); // ✅ 경로 가져오기
   const title = getTitleFromPath(path); // ✅ 타이틀 가져오기
   const { user } = useAuthStore(); // ✅ 유저 가져오기
@@ -52,7 +54,7 @@ export default function ChatRoomsList() {
 
 
 
-console.log("rooms", rooms);
+// console.log("rooms", rooms);
 
 
 
@@ -63,6 +65,8 @@ console.log("rooms", rooms);
     setActiveRoomId(room.id); // ✅ 방 선택
     setUserData(user); // ✅ 유저 선택
     setIsOpen(true); // ✅ 팝업 열기
+    setUnreadCount(room.attributes.unreadCount);
+    console.log("unreadCount", unreadCount);
   }, [user]);
 
   const handleLeaveRoom = useCallback(async (roomId: number) => {
@@ -101,7 +105,7 @@ console.log("rooms", rooms);
                     </span>
                   )}
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center relative">
                   <p className="text-sm text-gray-500 truncate">
                     {room.attributes.lastMessage}
                   </p>
@@ -113,11 +117,11 @@ console.log("rooms", rooms);
                   >
                     <X />
                   </button>
-                  {/* {room.attributes.unreadCount > 0 && (
-                    <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  {room.attributes.unreadCount > 0 && (
+                    <span className="bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center absolute -left-[26px] -top-[27px]">
                       {room.attributes.unreadCount}
                     </span>
-                  )} */}
+                  )}
                 </div>
 
                 {/* ✅ 나가기 버튼 아래에 배치 */}
@@ -145,6 +149,7 @@ console.log("rooms", rooms);
           participantsCount={participantsCount}
           activeRoomId={activeRoomId}
           userData={userData}
+          unreadCount={unreadCount}
         />
       )}
     </div>

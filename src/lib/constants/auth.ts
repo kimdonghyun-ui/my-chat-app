@@ -4,6 +4,8 @@
 export const protectedRoutes = [
     '/', 
     '/profile',
+    '/friends',
+    '/rooms',
     // '/dashboard',
     // '/statistics',
     // '/transactions'

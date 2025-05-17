@@ -21,6 +21,7 @@ interface ChatRoomPopupProps {
   activeRoomId: number | null;
   userData: User | null;
   room: Room | null;
+  unreadCount: number;
 }
 
 const ChatRoomPopup = ({
@@ -31,9 +32,11 @@ const ChatRoomPopup = ({
   activeRoomId,
   userData,
   room,
+  unreadCount,
 }: ChatRoomPopupProps) => {
   const [input, setInput] = useState("");
   const [page, setPage] = useState(1);
+  const [count, setCount] = useState(0);
   const { messages, sendMessage, getMessages, hasMore } = useChatStore();
   const { addFriendToRoom, updateLastMessageToRoom } = useRoomStore();
   const chatBoxRef = useRef<HTMLDivElement>(null);
@@ -97,6 +100,10 @@ const ChatRoomPopup = ({
   useEffect(() => {
     if (isOpen && page === 1 && messages.length > 0) {
       scrollToBottom();
+      if(unreadCount > 0) {
+        updateLastMessageToRoom(activeRoomId, null, 0);
+      }
+      setCount(unreadCount);
     }
   }, [messages, isOpen, page]);
 
@@ -143,7 +150,14 @@ const ChatRoomPopup = ({
     
     socket.emit("new-messages", newMessage2, activeRoomId);
 
-    const updatedRoom = await updateLastMessageToRoom(activeRoomId, newMessage.text)
+
+    
+    // 메시지 전송할때 룸 업데이트(라스트 메시지, 읽지않은 메시지 수)
+    const newUnreadCount = count + 1
+    const updatedRoom = await updateLastMessageToRoom(activeRoomId, newMessage.text, newUnreadCount)
+    setCount(newUnreadCount);
+
+    
     // 소켓으로 다른 유저에게 초대 알림 보내기
     socket.emit("room-invite", 'add', activeRoomId, updatedRoom );
 
