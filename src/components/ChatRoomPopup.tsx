@@ -137,7 +137,7 @@ const ChatRoomPopup = ({
   if (!userData || !isOpen) return null;
 
   const handleSend = async () => {
-    if (!input.trim()) return;
+    if (!input.trim() || sendLoading) return;
     setSendLoading(true);
     const newMessage = {
       text: input.trim(),
