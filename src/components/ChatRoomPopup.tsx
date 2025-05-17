@@ -37,6 +37,7 @@ const ChatRoomPopup = ({
   const [input, setInput] = useState("");
   const [page, setPage] = useState(1);
   const [count, setCount] = useState(0);
+  const [sendLoading, setSendLoading] = useState(false);
   const { messages, sendMessage, getMessages, hasMore } = useChatStore();
   const { addFriendToRoom, updateLastMessageToRoom } = useRoomStore();
   const chatBoxRef = useRef<HTMLDivElement>(null);
@@ -137,7 +138,7 @@ const ChatRoomPopup = ({
 
   const handleSend = async () => {
     if (!input.trim()) return;
-
+    setSendLoading(true);
     const newMessage = {
       text: input.trim(),
       sentAt: new Date().toISOString(),
@@ -156,7 +157,7 @@ const ChatRoomPopup = ({
     const newUnreadCount = count + 1
     const updatedRoom = await updateLastMessageToRoom(activeRoomId, newMessage.text, newUnreadCount)
     setCount(newUnreadCount);
-
+    setSendLoading(false);
     
     // 소켓으로 다른 유저에게 초대 알림 보내기
     socket.emit("room-invite", 'add', activeRoomId, updatedRoom );
@@ -274,9 +275,11 @@ const ChatRoomPopup = ({
         />
         <button
           onClick={handleSend}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm"
+          disabled={sendLoading}
+          className={`px-4 py-2 rounded-lg text-sm transition-colors duration-200
+            ${sendLoading ? "bg-gray-400 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600 text-white"}`}
         >
-          전송
+          {sendLoading ? "전송 중..." : "전송"}
         </button>
       </div>
 
