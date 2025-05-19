@@ -66,7 +66,7 @@ export function handleFileUpload(
   
 		  // ✅ 가로세로 100% 적용
 		  const svgString = `
-			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid slice">
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="100%" height="100%" preserveAspectRatio="xMidYMid slice">
 			  <image href="${compressedDataUrl}" width="100%" height="100%" />
 			</svg>
 		  `.trim();
