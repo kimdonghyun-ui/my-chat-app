@@ -37,7 +37,6 @@
 // }
 
 
-
 export function handleFileUpload(
 	event: React.ChangeEvent<HTMLInputElement>,
   ): Promise<string> {
@@ -51,7 +50,7 @@ export function handleFileUpload(
 		img.src = e.target?.result as string;
   
 		img.onload = () => {
-		  const MAX_WIDTH = 128; // ✅ 최대 가로 사이즈 제한
+		  const MAX_WIDTH = 128;
 		  const scale = MAX_WIDTH / img.width;
 		  const width = MAX_WIDTH;
 		  const height = img.height * scale;
@@ -63,13 +62,12 @@ export function handleFileUpload(
 		  canvas.height = height;
 		  ctx?.drawImage(img, 0, 0, width, height);
   
-		  // ✅ WebP 포맷 + 압축률 낮추기 (0.3 = 30% 품질)
 		  const compressedDataUrl = canvas.toDataURL("image/webp", 0.3);
   
-		  // ✅ SVG로 감싸기
+		  // ✅ 가로세로 100% 적용
 		  const svgString = `
-			<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
-			  <image href="${compressedDataUrl}" width="${width}" height="${height}" />
+			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid slice">
+			  <image href="${compressedDataUrl}" width="100%" height="100%" />
 			</svg>
 		  `.trim();
   
