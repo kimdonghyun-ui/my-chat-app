@@ -5,6 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { handleFileUpload } from "@/utils/fileUpload";
 import ProfileImage from "@/components/ProfileImage";
 import { Pencil, Save, X } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export default function ProfileContent() {
   const { user, handleProfileUpdate } = useAuthStore();
@@ -48,9 +49,14 @@ export default function ProfileContent() {
     setEditedUser({
       username: user?.username || '',
       email: user?.email || '',
-      password: '',
+      password: user?.email === 'hello@naver.com' ? 'hello123' : '',
       profileImage: user?.profileImage || ''
     });
+
+    if ((editedUser.email === 'hello@naver.com') && isEditing) {
+      toast.success('hello@naver.com 계정은 테스트 계정이므로 이메일 및 비밀번호 변경이 불가능합니다.');
+    }
+
   }, [isEditing, user]);
 
   return (
@@ -144,6 +150,7 @@ export default function ProfileContent() {
               <label className="text-sm text-gray-500 dark:text-gray-300">이메일</label>
               {isEditing ? (
                 <input
+                  disabled={editedUser.email === 'hello@naver.com'}
                   type="email"
                   value={editedUser.email}
                   onChange={(e) => setEditedUser(prev => ({ ...prev, email: e.target.value }))}
@@ -159,6 +166,7 @@ export default function ProfileContent() {
               <div>
                 <label className="text-sm text-gray-500 dark:text-gray-300">새 비밀번호</label>
                 <input
+                  disabled={editedUser.email === 'hello@naver.com'}
                   type="password"
                   value={editedUser.password}
                   onChange={(e) => setEditedUser(prev => ({ ...prev, password: e.target.value }))}
