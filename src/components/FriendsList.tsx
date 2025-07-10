@@ -1,6 +1,6 @@
 "use client";
 
-import ProfileImage from "@/components/ProfileImage";
+
 import { UserCircle } from "lucide-react";
 import { useFriendStore } from "@/store/friendStore";
 import { useRoomStore } from "@/store/roomStore";
@@ -8,6 +8,7 @@ import socket from "@/lib/socket";
 import { getTitleFromPath } from "@/utils/utils";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function FriendsList() {
   const { friends } = useFriendStore();
@@ -38,12 +39,7 @@ export default function FriendsList() {
           >
             <div className="relative">
               {user.profileImage ? (
-                <ProfileImage
-                  svgString={user.profileImage || ""}
-                  alt={user.username}
-                  size={40}
-                  className="object-cover"
-                />
+                <Image src={user.profileImage} alt={user.username} width={40} height={40} className="w-[40px] h-[40px] object-cover rounded-full" />
               ) : (
                 <UserCircle className="w-10 h-10 text-gray-400" />
               )}

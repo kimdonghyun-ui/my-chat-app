@@ -116,8 +116,8 @@ export const useAuthStore = create<AuthStore>()(
             method: "PUT",
             credentials: "include", //httpOnly 쿠키 를 제어하려면 필요
             body: JSON.stringify(data),
-          }, true);
-          console.log(response);
+          }, false);
+          console.log("response", response);
           set({ user: response });
           toast.success('프로필 업데이트 성공!');
         } catch (err) {

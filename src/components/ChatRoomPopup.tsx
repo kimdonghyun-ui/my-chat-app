@@ -11,7 +11,8 @@ import { Message, MessageResponse, Room, Sender } from "@/types/type";
 import socket from "@/lib/socket";
 import { useFriendStore } from "@/store/friendStore";
 import { useRoomStore } from "@/store/roomStore";
-import { UserRound } from 'lucide-react';
+// import { UserRound } from 'lucide-react';
+import Image from "next/image";
 
 interface ChatRoomPopupProps {
   isOpen: boolean;
@@ -221,10 +222,11 @@ const ChatRoomPopup = ({
                   size={40}
                   className="object-cover rounded-full overflow-hidden"
                 /> */}
-                <UserRound
+                {/* <UserRound
                   size={40}
                   className="rounded-full bg-gray-300 text-white p-2"
-                />
+                /> */}
+                <Image src={sender?.profileImage} alt={sender?.username} width={40} height={40} className="w-[40px] h-[40px] object-cover rounded-full" />
                 <div
                   className={`flex flex-col max-w-[75%] ${
                     mine ? "items-end" : "items-start"

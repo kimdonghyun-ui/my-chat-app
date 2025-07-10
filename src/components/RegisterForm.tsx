@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 
-import { handleFileUpload } from "@/utils/fileUpload";
+import { uploadImage } from "@/utils/uploadImage";
 
 export default function RegisterForm() {
   const [profileImage, setProfileImage] = useState<string>(""); //프로필 이미지
@@ -38,10 +38,9 @@ export default function RegisterForm() {
 	) => {
 		if (event.target.files && event.target.files.length > 0) {
 			try {
-				const svgString: string = await handleFileUpload(event);
-				setProfileImage(svgString); // ✅ 상태 업데이트
-				// setValue("profileImage", svgString); // ✅ React Hook Form의 값 업데이트
-				console.log("SVG 변환 결과:", svgString);
+        const imageUrl = await uploadImage(event.target.files[0]);
+				setProfileImage(imageUrl); // ✅ 상태 업데이트
+        console.log("이미지 업로드 결과:", imageUrl);
 			} catch (error) {
 				console.error("파일 변환 중 오류 발생:", error);
 			}

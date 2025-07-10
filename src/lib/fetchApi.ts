@@ -22,9 +22,10 @@ export async function fetchApi<T>(
 ): Promise<T> {
     // accessToken 불러오기
 	const accessToken = auth ? useAuthStore.getState().accessToken : null;
+    const isFormData = options.body instanceof FormData;
 	
 	const headers = {
-		"Content-Type": "application/json",
+        ...(isFormData ? {} : { "Content-Type": "application/json" }), // ✅ FormData일 땐 제거
 		...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
 	};
 
