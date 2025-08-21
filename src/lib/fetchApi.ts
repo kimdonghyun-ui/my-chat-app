@@ -38,17 +38,12 @@ export async function fetchApi<T>(
     if (auth && retry && response.status === 401) {
         try {
 
-            const result = await refreshApi(); // 🚨 여기서 실패하면 바로 catch로
-            const jwt = result?.jwt;
-          
-            if (!jwt) {
-                console.warn("❌ Refresh는 성공했지만 토큰이 없음");
-                throw new ApiError(401, "Refresh token expired");
-            }
-            
-            await updateAccessToken(jwt); // ✅ 토큰 갱신
-            return fetchApi<T>(url, options, auth, false); // ✅ 3) 다시 원래 요청 시도
+            await refreshApi(); // 🚨 여기서 실패하면 바로 catch로
 
+            // ✅ store 메서드 직접 호출
+            await useAuthStore.getState().checkAuth();
+
+            return fetchApi<T>(url, options, auth, false); // ✅ 3) 다시 원래 요청 시도
         } catch (error) {
             console.error('refreshApi 에러 발생:', error);
             useAuthStore.getState().performLogout(); // 로그아웃 처리 기능 모음(
@@ -60,25 +55,12 @@ export async function fetchApi<T>(
 }
 
 
+
+
 //리플래쉬 = httponly - cookie 속의 refreshToken 을 사용하여 accessToken 을 재발급하는 함수
 export async function refreshApi(): Promise<RefreshResponse> {
-    return fetchApi<RefreshResponse>('/token/refresh', {
+    return fetchApi<RefreshResponse>('/auth/refresh', {
       method: 'POST',
       credentials: 'include', //httpOnly 쿠키 를 제어하려면 필요
-    }, false, false);
+    }, false);
 }
-
-// 억세스토큰을 새로 받은경우 쿠키와 로컬스토리지에 저장
-export async function updateAccessToken(jwt: string) {
-    await fetch("/api/set-cookie", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-            name: "accessToken",
-            value: jwt,
-            action: "set",
-        }),
-    });
-    useAuthStore.setState({ accessToken: jwt });
-  }

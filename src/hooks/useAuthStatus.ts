@@ -8,31 +8,18 @@ interface UseAuthStatusReturn {
 }
 
 export function useAuthStatus(): UseAuthStatusReturn {
-	const { setAccessToken, setUser } = useAuthStore();
+	const { checkAuth } = useAuthStore();
 	const [isInitialized, setIsInitialized] = useState(false);
-
+	
 	useEffect(() => {
-		const checkAuth = async () => {
-			try {
-				const res = await fetch("/api/auth/status", {
-					method: "GET",
-					credentials: "include", // ✅ 쿠키 포함하여 요청 (자동 로그인 유지)
-				});
-
-                const data: { token: string | null } = await res.json();
-				setAccessToken(data.token); //Zustand에 억세스 토큰 저장!!(중요!! 억세스 토큰은 http로 서버쿠키라서 접근이 불가하기에 /api/me 통해 쿠키 불러오고 그걸 useAuth통해 불러와서 상태관리에 넣어주는 것이다. )
-
-				// const user = getLocalStorage("userInfo") as User;
-				// setUser(user); //zustand 에 user 저장
-			} catch (error) {
-				console.error('Auth status check failed:', error);
-			} finally {
-				setIsInitialized(true);
-			}
-		};
-
-		checkAuth();
-	}, [setAccessToken, setUser]);
+		(async () => {
+			await checkAuth();   // ✅ 쿠키에 접근해서 값을 읽어서 setAccessToken 해주기위함
+			setIsInitialized(true);       // ✅ 여기서 추가로 처리 가능
+		})();
+	}, [checkAuth]);
+	// 의존성에 user 추가 이유
+	// 로그인을 하면 user를 넣어주기때문에 위에 useEffect 가 반응하게 된다.
+	// 로그인 성공하자마자 httpOnly 쿠키에 접근이 어려워서 해당 useEffect 를 실행하게되면 쿠키에 접근해서 값을 읽어서 setAccessToken 해주기위함
 
 	return { isInitialized };
 }

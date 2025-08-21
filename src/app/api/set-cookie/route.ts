@@ -39,3 +39,17 @@ export async function POST(req: Request) {
 
 	return NextResponse.json({ message: "잘못된 요청" }, { status: 400 });
 }
+
+
+// ### 위의 내장 API(HttpOnly 쿠키 제어) ###
+// ✅ 2. Next.js API 호출하여 쿠키 저장 (쿠키 이름을 동적으로 전달)
+// const resCookie = await fetch("/api/set-cookie", {
+//   method: "POST",
+//   credentials: "include",
+//   headers: { "Content-Type": "application/json" },
+//   body: JSON.stringify({
+//       name: "accessToken", // ✅ 원하는 쿠키 이름 설정
+//       value:jwt,
+//       action: "set",
+//   }),
+// });

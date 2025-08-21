@@ -7,6 +7,7 @@ import { useRedirectStore } from './redirectStore';
 import { useFriendStore } from './friendStore';
 import { useChatStore } from './chatStore';
 import { useRoomStore } from './roomStore';
+import { parseStrapiError } from "@/utils/parseStrapiError";
 
 interface AuthStore {
   error: string | null;
@@ -26,6 +27,8 @@ interface AuthStore {
   handleProfileUpdate: (data: ProfileUpdate) => Promise<void>;
   // 로그아웃 처리
   performLogout: () => Promise<void>;
+  // 인증 상태 확인
+  checkAuth: () => Promise<void>;
   // 스토어 초기화
   reset: () => void;
 }
@@ -52,32 +55,22 @@ export const useAuthStore = create<AuthStore>()(
             credentials: "include", //httpOnly 쿠키 를 제어하려면 필요
             body: JSON.stringify(data),
           }, false);
-          const { jwt, user } = response;
 
-          set({ accessToken: jwt, user: user });
+          // 로그인 성공시 유저 정보 저장
+          const { user } = response;
+          set({ user: user });
 
-          // ✅ 2. Next.js API 호출하여 쿠키 저장 (쿠키 이름을 동적으로 전달)
-          const resCookie = await fetch("/api/set-cookie", {
-            method: "POST",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                name: "accessToken", // ✅ 원하는 쿠키 이름 설정
-                value:jwt,
-                action: "set",
-            }),
-          });
-
-          if (!resCookie.ok) {
-            console.warn("accessToken 쿠키 설정 실패");
-          }
-
+          // 토큰은 응답값으로 서버에서 주지 않고 httpOnly 쿠키에 저장 해줌
+          // httpOnly 쿠키는 바로 접근이 어려우므로
+          // useAuthStatus.ts 에서 useEffect 에 user 를 의존하여 실행되게 하고 그안에서 쿠키 토큰을 불러오고 그걸 setAccessToken 에 저장해줌
+          await get().checkAuth();
           toast.success('로그인 성공!');
           useRedirectStore.getState().setLinkName('/friends'); // ✅ 로그인 후 리다이렉트 처리
 
         } catch (err) {
-          set({ error: '로그인 실패!' });
-          toast.error('로그인 실패!');
+          const errorMessage = parseStrapiError(err, "로그인 실패!");
+          toast.error(`"로그인 실패 : "${errorMessage}`);
+          set({ error: errorMessage });
           throw err;
         } finally {
           set({ isLoading: false });
@@ -99,9 +92,11 @@ export const useAuthStore = create<AuthStore>()(
             password: data.password 
           });
         } catch (err) {
-          set({ error: '회원가입 실패!' });
-          toast.error('회원가입 실패!');
+          const errorMessage = parseStrapiError(err, "회원가입 실패!");
+          toast.error(`"회원가입 실패 : "${errorMessage}`);
+          set({ error: errorMessage });
           throw err;
+
         } finally {
           set({ isLoading: false });
         }
@@ -116,13 +111,14 @@ export const useAuthStore = create<AuthStore>()(
             method: "PUT",
             credentials: "include", //httpOnly 쿠키 를 제어하려면 필요
             body: JSON.stringify(data),
-          }, false);
+          }, true);
           console.log("response", response);
           set({ user: response });
           toast.success('프로필 업데이트 성공!');
         } catch (err) {
-          set({ error: '프로필 업데이트 실패!' });
-          toast.error('프로필 업데이트 실패!');
+          const errorMessage = parseStrapiError(err, "프로필 업데이트 실패!");
+          toast.error(`"프로필 업데이트 실패 : "${errorMessage}`);
+          set({ error: errorMessage });
           throw err;
         } finally {
           set({ isLoading: false });
@@ -193,6 +189,23 @@ export const useAuthStore = create<AuthStore>()(
 
           useRedirectStore.getState().setLinkName('/login'); // 로그인 페이지로 리다이렉트(.ts에서는 router를 사용못하므로 해결책으로 사용)
 
+        }
+      },
+
+      // 인증 상태 확인
+      checkAuth: async () => {
+        try {
+          const res = await fetch("/api/auth/status", {
+            method: "GET",
+            credentials: "include",
+          });
+    
+          
+          const data: { token: string | null } = await res.json();
+          set({ accessToken: data.token });
+        } catch (error) {
+          console.error("Auth status check failed:", error);
+          set({ accessToken: null, user: null });
         }
       },
 
