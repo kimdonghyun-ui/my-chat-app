@@ -31,7 +31,8 @@ export async function fetchApi<T>(
 
     const defaultOptions :RequestInit = { ...options, headers }
 
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}${url}`, defaultOptions);
+    const response = await fetch(`api${url}`, defaultOptions);
+    // const response = await fetch(`${process.env.NEXT_PUBLIC_API_SERVER_URL}${url}`, defaultOptions);
 
     
     // 인증이 필요한 경우 토큰 만료 처리
